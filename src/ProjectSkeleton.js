@@ -17,8 +17,8 @@ var ProjectSkeleton = {
     getSdsDir: function (sysId) {
         return toPath( [rootPath, sysId, 'sds'] ) ;
     },
-    getTriggerDir: function (sysId) {
-        return  toPath([this.getSdsDir(sysId), 'Common', 'trigger']) ;
+    getTriggerDir: function (sysId, fileName) {
+        return  toPath([this.getSdsDir(sysId), 'Common', 'trigger'], fileName) ;
     },
     getSelectDir: function (sysId) {
         return toPath( [this.getSdsDir(sysId), 'Common', 'select'] );
