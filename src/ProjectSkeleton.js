@@ -23,6 +23,9 @@ var ProjectSkeleton = {
     getSelectDir: function (sysId) {
         return toPath( [this.getSdsDir(sysId), 'Common', 'select'] );
     },
+    getApiDir: function (sysId) {
+        return toPath( [this.getSdsDir(sysId), 'Common', 'api'] );
+    },
     getSpecDir: function (specId, fileName) {
         var sysId = specId.substring(0, 2).toLowerCase();
         return toPath( [this.getSdsDir(sysId), specId] , fileName);
