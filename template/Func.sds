@@ -1,0 +1,81 @@
+#SPEC (<%=spec.id%> <%=spec.name%>)
+	description
+		- 這裡開始寫關於這份spec的整體說明
+		- 這裡開始寫關於這份spec的整體說明
+			+ 第 2.1 層資料
+			+ 第 2.2 層資料
+				* 第 3.1 層資料
+				* 第 3.2 層資料
+
+#UI <%=gul%>
+	url http://uibdvlp.csc.com.tw/csc/ap/UA/UAGOA1.gul
+	img
+		img/<%=spec.id%>-1.png <%=spec.name%>作業(1/2)
+		img/<%=spec.id%>-2.png <%=spec.name%>作業(2/2)
+
+#Module
+	relations
+		<%= funcClz %>->sajc01VO, <%= funcClz %>->sajc02VO, <%= funcClz %>->sajcB2VO, <%= funcClz %>->sbjcApi01
+		sbjcApi01->sbjcLogic01
+	tables
+		[TBFVB01]1-0..*[TBFVB02], [TBFVB01]1-0..*[TBFVA02], [TBFVB01]1-0..*[TBFVB05]
+
+#func (<%= funcClz %>) 
+	vo
+<% forms.forEach(function(form,idx){ -%>
+		<%=form.id%> <%=sysId%>jcA<%=idx%>VO
+<% }) -%> 
+<% grids.forEach(function(grid,idx){ -%>
+		<%=grid.id%> <%=sysId%>jcB<%=idx%>VO *
+<% }) -%> 
+
+	init
+		將畫面資料抓到所有vo中
+
+	validate
+		<%= page.getTransacBtns() %>
+			if 採購類別=A
+				採購金額至少1000
+					aadf
+			adfadf
+
+		query
+			查詢key值不得空
+
+<% page.btns.forEach(function(btn){ %>
+	+<%=btn.id%> <%=btn.label%>
+		驗證畫面所有欄位內容，.....
+		這個我想應該是有可能的
+<% }) %>
+
+	-List<fvjctbD3VO> getDatas(String compId, String version, String tradeItem)
+		宣告 private 方法
+		取得畫面資料
+		List datas
+		String id = [操作者工號][_][西元年月日時分秒]，如：I12345_20140730105730
+		產生本作業所需的資料
+			call fv.logic.fvjcCreateLD4AData.createD3TmpData(dsCom, id, compId, version, tradeItem)
+		取得圖一A組的資料   
+			List<fvjctbD3TMPVO> D3TMPVO = fvjctbD3TMPDAO.getLD4ADataA(id, compId, version, tradeItem)
+			for vo:D3TMPVO
+				vo.buyCodeName = cg.api.cgjcApi.getCompanyName(vo.buyCode)
+
+	end 
+		控制畫面UI
+		設定畫面授權
+		將畫面資料放入
+			記得處理異常
+
+#columns
+<% page.forms.forEach(function(form){  %>
+	- form [<%=form.id%>] -
+<% form.fields.forEach(function(field){  -%>
+		<%- field.label %>	<%=field.type%>	<%- field.label %>的name	<%=field.descript%>	<%=page.getTransacBtns()%>
+<%})  -%>
+<% })  %>
+<% page.grids.forEach(function(grid){  %>
+	- grid [<%=grid.id%>] -
+<% grid.fields.forEach(function(field){  -%>
+		<%- field.label %>	<%=field.type%>	<%- field.label %>的name	<%=field.descript%>	<%=page.getTransacBtns()%>
+<%}) -%>
+<% }) %>

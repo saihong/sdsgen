@@ -1,0 +1,14 @@
+{
+  "name": "sds-gen",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "underscore": "^1.6.0",
+    "ejs": "^1.0.0",
+    "mkdirp": "^0.5.0",
+    "xmldom": "^0.1.19"
+  },
+  "dependencies": {
+    "fs-extra": "^0.11.1"
+  }
+}

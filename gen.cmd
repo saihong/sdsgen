@@ -1,0 +1,1 @@
+node src/gen.js %1 %2
