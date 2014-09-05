@@ -5,6 +5,8 @@
  * Time: 上午 8:09
  * To change this template use File | Settings | File Templates.
  */
+var _ = require('underscore');
+
 var CodeUtils = {
     times: function(symbol, times) {
         var str = "";

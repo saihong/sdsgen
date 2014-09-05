@@ -52,4 +52,4 @@ var ProjectSkeleton = {
 
 }
 
-exports.exports = ProjectSkeleton ;
+module.exports = ProjectSkeleton ;
