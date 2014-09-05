@@ -5,19 +5,18 @@ var fs = require('fs-extra'),
     xmldom = require('xmldom'),
     DOMParser = xmldom.DOMParser,
     XMLSerializer = xmldom.XMLSerializer,
+    ProjectSkeleton = require('./ProjectSkeleton.js'),
     ValueObjects = require('./ValueObject.js'),
     nodeFileParser = require('./Node.js'),
     args = process.argv.slice(2),
     sdsFileName = args[0],
     sysId = sdsFileName.substring(0,2).toLowerCase(),
     specId=sdsFileName.replace(/\.txt/,''),
-    sdsDir = '../'+sysId+'/sds/'+specId,
-    sdsFilePath = sdsDir+'/'+sdsFileName,
     ejs = require('ejs');
 
 
 function parseSdsObj() {
-    var rootNode = nodeFileParser(sdsFilePath) ;
+    var rootNode = nodeFileParser( ProjectSkeleton.getSpecDir(specId, sdsFileName)) ;
     var sdsObj = new ValueObjects.sds(rootNode);
     sdsObj.context = {
         sds: sdsObj,
@@ -35,8 +34,8 @@ function parseSdsObj() {
 function genFuncJava(sdsObj) {
     var funcTmpl = fs.readFileSync('template/Func.java', 'utf8');
     var output = ejs.render(funcTmpl, sdsObj.context);
-    var srcPath = sdsFilePath.replace(/\/[^\/]+$/, '').replace(/sds/, 'src'),
-        javaDir = srcPath + '/' + sdsObj.func.pkgPath + '/';
+    var srcPath = ProjectSkeleton.getJavaSrcDir(sysId) ,
+        javaDir = ProjectSkeleton.getJavaSrcDir(sysId) + '/' + sdsObj.func.pkgPath + '/';
 
     mkdirp(javaDir, function(err) {
         if (err) console.error(err)
@@ -47,20 +46,9 @@ function genFuncJava(sdsObj) {
     });
 
 }
-function genTrigger(sdsObj){
-    sdsObj.func.columnGroups.forEach(function(colGrp){
-        if (colGrp.datasrc){
-            var info = colGrp.datasrc.split('.'),
-                clz = info[0]+'jcTrigger'+info[1].substring(0,1).toUpperCase()+info[1].substring(1) ;
-            var context={
-                sysId:sdsObj.func.sysId,
-                triggerClz:clz
-            }
-        }
-    })
-}
+
 function genGul(sdsObj) {
-    var gulText = fs.readFileSync(sdsDir+'/gul/'+specId+'.gul', 'utf8');
+    var gulText = fs.readFileSync( ProjectSkeleton.getSpecGulDir(specId, specId+'.gul'), 'utf8');
 
     var doc = new DOMParser().parseFromString(gulText, 'text/xml');
     sdsObj.columnGroups.forEach(function(columnGroup) {
@@ -136,7 +124,7 @@ function genGul(sdsObj) {
         return label+"Id";
     }
 
-    var gulDestDir='../'+sysId+'/gul',
+    var gulDestDir= ProjectSkeleton.getGulDir(sysId),
         gulDestPath = gulDestDir+'/'+sdsObj.ui.fileName.replace(/\.gul/,'_gen.gul') ;
     mkdirp(gulDestDir, function(err) {
         if (err) console.error(err)
@@ -151,7 +139,8 @@ function genGul(sdsObj) {
 function genMarkDownHtml(sdsObj) {
     var mdTmpl = fs.readFileSync('template/SDS.md', 'utf8'),
         mdOutput = ejs.render(mdTmpl, sdsObj.context),
-        sdsdir = '../html/' + sdsObj.spec.sysId + '/sds';
+        sdsdir = ProjectSkeleton.getSdsDir(sdsObj.spec.sysId),
+        specDir = ProjectSkeleton.getSpecDir(sdsObj.spec.sysId);
 
     function output(dir, fileName, output) {
         mkdirp(dir, function(err) {
@@ -163,8 +152,8 @@ function genMarkDownHtml(sdsObj) {
     }
 
     output(sdsdir, sdsObj.spec.id + '.md', mdOutput);
-    var imgDir= sdsdir+'/img' ;
-    fs.copy(imgDir, sdsdir+'/'+specId, function(err) {
+    var imgDir= ProjectSkeleton.getSpecImgDir(sdsObj.spec.id) ;
+    fs.copy(imgDir, specDir, function(err) {
         if (!err) {
             console.log("copy "+imgDir+"/ success!") ;
         }

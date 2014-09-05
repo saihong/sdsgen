@@ -5,7 +5,13 @@
  * Time: 上午 8:11
  * To change this template use File | Settings | File Templates.
  */
-var CodeUtils = require('./CodeUtils.js') ;
+var CodeUtils = require('./CodeUtils.js'),
+    args = process.argv.slice(2),
+    nodeFileParser = require('./Node.js') ;
+
+var triggerId = args[0],
+    sysId = triggerId.replace(/\..+$/,'') ;
+
 var Trigger = {
 
 }
@@ -17,6 +23,7 @@ Trigger.VO= function(node) {
     this.spec = CodeUtils.parseElement(node, "spec", function(child) {
         return new Trigger.SqlSegment(child);
     });
+    this.triggerClz = this.triggerId+'jc'+ CodeUtils.capitalize(this.triggerName) ;
 };
 
 Trigger.Sql = function(node) {
@@ -37,3 +44,13 @@ Trigger.Sql = function(node) {
 Trigger.SqlSegment = function(node) {
     this.statement = node.text.trim() ;
 }
+
+function getTriggerSDSPath(triggerId) {
+    return '../'+sysId+'/sds/Common/trigger/'+triggerId+'.txt' ;
+}
+
+var triggerNode = nodeFileParser(getTriggerSDSPath(triggerId)) ;
+var triggerTmpl = fs.readFileSync('template/trigger.java', 'utf8');
+
+
+
