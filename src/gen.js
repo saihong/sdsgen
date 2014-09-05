@@ -6,6 +6,7 @@ var fs = require('fs-extra'),
     DOMParser = xmldom.DOMParser,
     XMLSerializer = xmldom.XMLSerializer,
     ValueObjects = require('./ValueObject.js'),
+    nodeFileParser = require('./Node.js'),
     args = process.argv.slice(2),
     sdsFileName = args[0],
     sysId = sdsFileName.substring(0,2).toLowerCase(),
@@ -14,109 +15,10 @@ var fs = require('fs-extra'),
     sdsFilePath = sdsDir+'/'+sdsFileName,
     ejs = require('ejs');
 
-function Node(txt) {
-    this.text = txt;
-    this.children = [];
-    this.prevSibling = null;
-    this.parentNode = null;
-    this.values = [];
-    this.attribute = "";
 
-    this.test = function(re) {
-        return re.test(this.text.trim());
-    }
-    this.addChild = function(node) {
-        var prev = this.lastChild();
-        node.prevSibling = prev;
-        node.parentNode = this;
-        this.children.push(node);
-    };
-    this.getShiftCount = function() {
-        var m = this.text.match(/^(\t*)/);
-        return (m === null ? 0 : m[1].length) + 1;
-    };
-    this.lastChild = function() {
-        if (this.children.length == 0) {
-            return null;
-        }
-        return this.children[this.children.length - 1];
-    };
-    this.firstChild = function() {
-        if (this.children.length == 0) {
-            throw new Error("node has no children");
-        }
-        return this.children[0];
-    };
-    this.removeLastChild = function() {
-        this.children.pop();
-    };
-    this.hasChild = function() {
-        return this.children.length > 0;
-    }
-    this.parent = function(re) {
-        var pNode = this.parentNode;
-        while (pNode != null && !re.test(pNode.text.trim())) {
-            pNode = pNode.parentNode;
-        }
-        return pNode;
-    };
-
-    this.offsetParent = function(re) {
-        function getRightParent(parentNode) {
-            if (!parentNode) {
-                return null;
-            }
-            if (re.test(parentNode.text.trim())) {
-                return parentNode;
-            } else {
-                getRightParent(parentNode.parentNode);
-            }
-        }
-
-        var parent = getRightParent(this.parentNode);
-        if (!parent) {
-            return this.getShiftCount();
-        }
-        console.log('parent shiftcount:' + parent.getShiftCount() + ', this.shiftCount:' + this.getShiftCount());
-        return this.getShiftCount() - parent.getShiftCount();
-    }
-}
-
-function parseNode(text) {
-    var lines = text.split(/\n/),
-        root = new Node("root"),
-        parentNodes = [root];
-
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        if (!line.trim()) {
-            continue;
-        }
-        var node = new Node(line);
-        var shift = node.getShiftCount();
-        parentNodes[shift] = node;
-        var parentNode = parentNodes[shift - 1];
-        parentNode.addChild(node);
-    }
-}
-
-function parseSDS(sdsText) {
-    var lines = sdsText.split(/\n/),
-        root = new Node("root"),
-        parentNodes = [root];
-
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        if (!line.trim()) {
-            continue;
-        }
-        var node = new Node(line);
-        var shift = node.getShiftCount();
-        parentNodes[shift] = node;
-        var parentNode = parentNodes[shift - 1];
-        parentNode.addChild(node);
-    }
-    var sdsObj = new ValueObjects.sds(root);
+function parseSdsObj() {
+    var rootNode = nodeFileParser(sdsFilePath) ;
+    var sdsObj = new ValueObjects.sds(rootNode);
     sdsObj.context = {
         sds: sdsObj,
         func: sdsObj.func,
@@ -127,11 +29,6 @@ function parseSDS(sdsText) {
         module: sdsObj.module
     };
     return sdsObj;
-}
-
-function readParseSDS() {
-    var sdsText = fs.readFileSync(sdsFilePath, 'utf8');
-    return parseSDS(sdsText);
 }
 
 
@@ -275,11 +172,7 @@ function genMarkDownHtml(sdsObj) {
 
 }
 
-function layoutHtml(html) {
-    return ''
-}
-
-var sdsObj = readParseSDS();
+var sdsObj = parseSdsObj();
 genMarkDownHtml(sdsObj);
 
 var opt = args.length > 1 && args[1]?args[1]:'' ;
