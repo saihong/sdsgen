@@ -5,7 +5,10 @@
  * Time: 上午 8:09
  * To change this template use File | Settings | File Templates.
  */
-var _ = require('underscore');
+var _ = require('underscore'),
+    mkdirp = require('mkdirp'),
+    ejs = require('ejs'),
+    fs = require('fs-extra') ;
 
 var CodeUtils = {
     times: function(symbol, times) {
@@ -25,7 +28,7 @@ var CodeUtils = {
     trimLeft:function(shiftTimes,str) {
         return str.replace(new RegExp('^'+this.timesShift(shiftTimes)),'') ;
     },
-    getStatement: function(node) {
+    getStatement: function(node, trimTab) {
         var descripts = [],
             rootShift = node.getShiftCount() ;
         function trimRootShift(text, minusShift) {
@@ -65,6 +68,9 @@ var CodeUtils = {
                         descripts.push(line.trim()) ;
                         descripts.push(' ') ;
                     } else {
+                        if (trimTab) {
+                            line = line.replace(/^\t/,'') ;
+                        }
                         descripts.push(line);
                     }
                 }
@@ -118,6 +124,20 @@ var CodeUtils = {
     },
     capitalize:function(str){
         return str.substring(0,1).toUpperCase()+str.substring(1) ;
+    },
+    genStuff:function(templatePath, context, destFile) {
+        var dir = destFile.replace(/\/[\w\-\.]+$/,'') ;
+        var tmpl = fs.readFileSync(templatePath, 'utf8');
+        var output = ejs.render(tmpl, context) ;
+        mkdirp(dir, function(err){
+            if(err) console.err(err) ;
+            else {
+                fs.writeFile(destFile, output, 'utf8', function () {
+                    console.log(destFile  + ' is created!');
+                });
+            }
+        })
+        return output ;
     }
 };
 

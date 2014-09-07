@@ -5,7 +5,9 @@
  * Time: 下午 1:32
  * To change this template use File | Settings | File Templates.
  */
-var rootPath = '..';
+var rootPath = '..',
+    mdRootPath = rootPath+'/html';
+
 function toPath(pathEles, fileName) {
     if (fileName) {
         pathEles.push(fileName) ;
@@ -17,14 +19,17 @@ var ProjectSkeleton = {
     getSdsDir: function (sysId) {
         return toPath( [rootPath, sysId, 'sds'] ) ;
     },
-    getTriggerDir: function (sysId, fileName) {
-        return  toPath([this.getSdsDir(sysId), 'Common', 'trigger'], fileName) ;
+    getCommonDir:function(sysId) {
+        return toPath([this.getSdsDir(sysId), 'common']) ;
     },
-    getSelectDir: function (sysId) {
-        return toPath( [this.getSdsDir(sysId), 'Common', 'select'] );
+    getTriggerDir: function (sysId, fileName) {
+        return  toPath([this.getCommonDir(sysId), 'trigger'], fileName) ;
+    },
+    getSelectDir: function (sysId, fileName) {
+        return toPath( [this.getCommonDir(sysId), 'select'], fileName );
     },
     getApiDir: function (sysId) {
-        return toPath( [this.getSdsDir(sysId), 'Common', 'api'] );
+        return toPath( [this.getCommonDir(sysId), 'api'] );
     },
     getSpecDir: function (specId, fileName) {
         var sysId = specId.substring(0, 2).toLowerCase();
@@ -47,8 +52,16 @@ var ProjectSkeleton = {
     },
     getJavaSrcDir:function(sysId) {
         return toPath([rootPath, sysId, 'src']) ;
+    },
+    getMdDir:function(sysId) {
+        return toPath([mdRootPath, sysId, 'sds']) ;
+    },
+    getMdCommonDir:function(sysId) {
+        return toPath([this.getMdDir(sysId), 'common']) ;
+    },
+    getMdTriggerFilePath:function(sysId,triggerId) {
+        return toPath([this.getMdCommonDir(sysId), 'trigger'], triggerId+'.md') ;
     }
-
 
 }
 
