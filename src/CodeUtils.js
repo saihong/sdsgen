@@ -10,37 +10,34 @@ var _ = require('underscore'),
     ejs = require('ejs'),
     fs = require('fs-extra') ;
 
-var CodeUtils = {
-    times: function(symbol, times) {
-        var str = "";
-        for (var i = 0; i < times; i++) {
-            str += symbol
-        }
-        return str;
-    },
-    timesShift: function(times) {
-        return this.times("\t", times);
-    },
+function times (symbol, times) {
+    var str = "";
+    for (var i = 0; i < times; i++) {
+        str += symbol
+    }
+    return str;
+}
+
+function timesShift(count) {
+    return times("\t", count);
+}
+
+
+module.exports  = {
     join: function(sb, timesOfshift) {
-        var shift = this.timesShift(timesOfshift);
+        var shift = timesShift(timesOfshift);
         return shift + sb.join("\n" + shift);
     },
     trimLeft:function(shiftTimes,str) {
-        return str.replace(new RegExp('^'+this.timesShift(shiftTimes)),'') ;
+        return str.replace(new RegExp('^'+timesShift(shiftTimes)),'') ;
     },
     getStatement: function(node, trimTab) {
         var descripts = [],
             rootShift = node.getShiftCount() ;
-        function trimRootShift(text, minusShift) {
-            for (var i = 0; i < minusShift; i++) {
-                text = text.replace(/^\t/, '');
-            }
-            return text;
-        }
         function getDescript(node, codeChild) {
             _.each(node.children, function(ele) {
                 var shiftTimes = ele.getShiftCount() - rootShift;
-                var shift = CodeUtils.times("\t", shiftTimes);
+                var shift = times("\t", shiftTimes);
                 var codePtn = /(java|javascript|xml)/,
                     code = ele.test(/^\[(java|javascript|xml)\]$/) ;
 
@@ -52,10 +49,10 @@ var CodeUtils = {
                     var pNode = ele.parent(codePtn) ;
                     if (pNode) {
                         var offset = ele.getShiftCount()-pNode.getShiftCount() ;
-                        descripts.push( CodeUtils.timesShift(offset)+ele.text.trim() );
+                        descripts.push( timesShift(offset)+ele.text.trim() );
                     }
                 } else {
-                    var descript= CodeUtils.timesShift(ele.getShiftCount()-rootShift)+ele.text.trim(),
+                    var descript= timesShift(ele.getShiftCount()-rootShift)+ele.text.trim(),
                         itemSymbolPtn=/^[\-\+\*]\s*[^\-\+\*]+/;
                     if (descripts.length>0){
                         if (ele.test(itemSymbolPtn) && !itemSymbolPtn.test( descripts[descripts.length-1].trim() ) ) {
@@ -127,10 +124,10 @@ var CodeUtils = {
     },
     genStuff:function(templatePath, context, destFile) {
         var dir = destFile.replace(/\/[\w\-\.]+$/,'') ;
-        var tmpl = fs.readFileSync(templatePath, 'utf8');
+        var tmpl = fs.readFileSync('template/'+templatePath, 'utf8');
         var output = ejs.render(tmpl, context) ;
         mkdirp(dir, function(err){
-            if(err) console.err(err) ;
+            if(err) console.error(err) ;
             else {
                 fs.writeFile(destFile, output, 'utf8', function () {
                     console.log(destFile  + ' is created!');
@@ -140,5 +137,3 @@ var CodeUtils = {
         return output ;
     }
 };
-
-module.exports = CodeUtils ;

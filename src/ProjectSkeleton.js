@@ -15,9 +15,12 @@ function toPath(pathEles, fileName) {
     return pathEles.join('/');
 }
 
-var ProjectSkeleton = {
+module.exports = {
     getSdsDir: function (sysId) {
         return toPath( [rootPath, sysId, 'sds'] ) ;
+    },
+    getSpecRootDir: function (sysId) {
+        return toPath( [rootPath, sysId, 'sds', 'spec'] ) ;
     },
     getCommonDir:function(sysId) {
         return toPath([this.getSdsDir(sysId), 'common']) ;
@@ -31,9 +34,8 @@ var ProjectSkeleton = {
     getApiDir: function (sysId) {
         return toPath( [this.getCommonDir(sysId), 'api'] );
     },
-    getSpecDir: function (specId, fileName) {
-        var sysId = specId.substring(0, 2).toLowerCase();
-        return toPath( [this.getSdsDir(sysId), specId] , fileName);
+    getSpecDir: function (sysId, specId) {
+        return toPath( [this.getSpecRootDir(sysId), specId] );
     },
     getSpecImgDir:function(specId) {
         return toPath( [this.getSpecDir(specId),'img'])
@@ -53,16 +55,29 @@ var ProjectSkeleton = {
     getJavaSrcDir:function(sysId) {
         return toPath([rootPath, sysId, 'src']) ;
     },
-    getMdDir:function(sysId) {
-        return toPath([mdRootPath, sysId, 'sds']) ;
+    getMdDir:function(sysId, file) {
+        return toPath([mdRootPath, sysId, 'sds'], file) ;
+    },
+    getMdSpecRootDir:function(sysId) {
+        return toPath([this.getMdDir(sysId), 'spec']) ;
+    },
+    getMdSpecDir:function(sysId, spec) {
+        return toPath([this.getMdSpecRootDir(sysId), spec]) ;
     },
     getMdCommonDir:function(sysId) {
         return toPath([this.getMdDir(sysId), 'common']) ;
     },
     getMdTriggerFilePath:function(sysId,triggerId) {
         return toPath([this.getMdCommonDir(sysId), 'trigger'], triggerId+'.md') ;
+    },
+    getMdSelectDir:function(sysId) {
+        return toPath([this.getMdCommonDir(sysId), 'select']) ;
+    },
+    getMdTableDir:function(sysId, fileName) {
+        return toPath([this.getMdCommonDir(sysId), 'table'], fileName) ;
+    },
+    getSysDaoDir:function(sysId) {
+        return toPath([rootPath, sysId, 'dao']) ;
     }
-
 }
 
-module.exports = ProjectSkeleton ;

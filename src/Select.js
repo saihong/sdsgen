@@ -59,25 +59,32 @@ function getSelectSdsPath(sysId, selectId) {
     return ProjectSkeleton.getSelectDir(sysId, selectId);
 }
 
-function genSelect(selectSdsFilePath) {
+function parseSelect(selectSdsFilePath) {
     var node = nodeFileParser(selectSdsFilePath);
     var vo = new Select.VO(node.firstChild());
 
     var javaDir = ProjectSkeleton.getJavaSrcDir(sysId) + '/' + vo.pkgDir,
         destFile = javaDir + '/' + vo.selectClz + '.java';
-    vo.code = CodeUtils.genStuff('template/select.java', vo, destFile);
+    vo.code = CodeUtils.genStuff('select.java', vo, destFile);
     return vo;
 }
 
-var selectDir = ProjectSkeleton.getSelectDir(sysId);
-var files = fs.readdirSync(selectDir),
-    selects = [];
-files.forEach(function (file) {
-    var path = selectDir + '/' + file;
-    var select = genSelect(path);
-    selects.push(select);
-});
 
-var selectMdDir = ProjectSkeleton.getMdSelectFilePath(sysId);
-CodeUtils.genStuff('template/select.md', {sysId: sysId, selects: selects}, selectMdDir + '/' + sysId + '-select.md');
 
+module.exports = {
+    genMD:function(sysId,cache) {
+        var selectDir = ProjectSkeleton.getSelectDir(sysId);
+        var files = fs.readdirSync(selectDir),
+            selects = [];
+        files.forEach(function (file) {
+            var path = selectDir + '/' + file;
+            if (cache.isModified(path)){
+                var select = parseSelect(path);
+                selects.push(select);
+            }
+        });
+        var selectMdDir = ProjectSkeleton.getMdSelectDir(sysId);
+        CodeUtils.genStuff('select.md', {sysId: sysId, selects: selects}, selectMdDir + '/index.md');
+        return selects ;
+    }
+} ;

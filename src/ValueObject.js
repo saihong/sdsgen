@@ -338,7 +338,6 @@ ValueObjects.funcMethod = function(node) {
                 this.argus=privRslt[3] ;
             }
         }
-        debugger;
         this.specification = CodeUtils.getStatement(node);
     }
     this.isPublic = function() {
@@ -376,13 +375,15 @@ ValueObjects.column = function(node) {
     this.label = datas[0];
     this.type = datas[1];
     this.name = datas[2];
-    this.descript = datas[3];
+    this.descript = processDatasrc(datas[3]) ;
     this.verifyEvent = datas.length>4?datas[4]:'' ;
     this.isComboBox = function() {
         return /^combobox$/i.test(this.type);
     }
-    this.getDatasrc = function() {
-        return this.descript.replace(/datasrc=/, '').replace(/\s+.+$/, '');
+    function processDatasrc (descript) {
+        return descript.replace(/datasrc=([\w\.]+)/, function(m,grp){
+            return 'datasrc=['+grp+'](wiki.html#!pb/sds/common/select/index.md#'+grp+')' ;
+        }) ;
     }
 };
 

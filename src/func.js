@@ -8,15 +8,13 @@ var fs = require('fs-extra'),
     ProjectSkeleton = require('./ProjectSkeleton.js'),
     ValueObjects = require('./ValueObject.js'),
     nodeFileParser = require('./Node.js'),
+    CodeUtils = require('./CodeUtils.js'),
     args = process.argv.slice(2),
-    sdsFileName = args[0],
-    sysId = sdsFileName.substring(0,2).toLowerCase(),
-    specId=sdsFileName.replace(/\.txt/,''),
     ejs = require('ejs');
 
 
-function parseSdsObj() {
-    var rootNode = nodeFileParser( ProjectSkeleton.getSpecDir(specId, sdsFileName)) ;
+function parseSdsObj(sdsFilePath) {
+    var rootNode = nodeFileParser( sdsFilePath ) ;
     var sdsObj = new ValueObjects.sds(rootNode);
     sdsObj.context = {
         sds: sdsObj,
@@ -136,22 +134,26 @@ function genGul(sdsObj) {
     fs.writeFile(gulDestPath, genGul, 'utf8');
 }
 
-function genMarkDownHtml(sdsObj) {
-    var mdTmpl = fs.readFileSync('template/SDS.md', 'utf8'),
-        mdOutput = ejs.render(mdTmpl, sdsObj.context),
-        sdsdir = ProjectSkeleton.getSdsDir(sdsObj.spec.sysId),
-        specDir = ProjectSkeleton.getSpecDir(sdsObj.spec.sysId);
+function genMarkDownList(sysId,funcs) {
+    var funcContexts = funcs.map(function(ele){
+       return ele.context ;
+    });
+    var destFile = ProjectSkeleton.getMdSpecRootDir(sysId)+'/index.md' ;
+    CodeUtils.genStuff('sdsList.md', {funcs:funcContexts,sysId:sysId}, destFile) ;
+}
+function genMarkDownHtml(sysId,sdsObj) {
+    var specDir = ProjectSkeleton.getMdSpecDir(sysId, sdsObj.spec.id) ;
+    CodeUtils.genStuff('sds.md', sdsObj.context, specDir+'/'+sdsObj.spec.id+'.md') ;
 
-    function output(dir, fileName, output) {
-        mkdirp(dir, function(err) {
-            if (err) console.error(err)
-            else {
-                fs.writeFile(dir + '/' + fileName, output, 'utf8');
-            }
-        });
-    }
-
-    output(sdsdir, sdsObj.spec.id + '.md', mdOutput);
+//    function output(dir, fileName, output) {
+//        mkdirp(dir, function(err) {
+//            if (err) console.error(err)
+//            else {
+//                fs.writeFile(dir + '/' + fileName, output, 'utf8');
+//            }
+//        });
+//    }
+//    output(sdsdir, sdsObj.spec.id + '.md', mdOutput);
     var imgDir= ProjectSkeleton.getSpecImgDir(sdsObj.spec.id) ;
     fs.copy(imgDir, specDir, function(err) {
         if (!err) {
@@ -160,13 +162,40 @@ function genMarkDownHtml(sdsObj) {
     });
 
 }
+function parseFunc(sysId,cache) {
+    var specDir = ProjectSkeleton.getSpecRootDir(sysId) ;
+    var files = fs.readdirSync(specDir),
+        funcs = [];
+    files.forEach(function(file){
+//        var specPath = ProjectSkeleton.getSpecDir(file, file+'.txt') ;
+        var sdspath = ProjectSkeleton.getSpecDir(sysId, file)+'/'+file+'.txt' ;
+        if (cache.isModified(sdspath)) {
+            var func = parseSdsObj(sdspath) ;
+            funcs.push(func) ;
+        }
+    });
+    return funcs ;
+}
 
-var sdsObj = parseSdsObj();
-genMarkDownHtml(sdsObj);
-
-var opt = args.length > 1 && args[1]?args[1]:'' ;
-if (opt === 'java') {
-    genFuncJava(sdsObj);
-} else if (opt === 'gul') {
-    genGul(sdsObj) ;
+module.exports = {
+    genMD:function(sysId, cache) {
+        var funcs = parseFunc(sysId, cache) ;
+        funcs.forEach(function(func){
+            genMarkDownHtml(sysId, func) ;
+        }) ;
+        genMarkDownList(sysId,funcs) ;
+        return funcs ;
+    },
+    genGul:function(sysId) {
+        var funcs = parseFunc(sysId) ;
+        funcs.forEach(function(func){
+            genGul(func) ;
+        }) ;
+    },
+    genJava:function(sysId) {
+        var funcs = parseFunc(sysId) ;
+        funcs.forEach(function(func){
+            genFuncJava(func) ;
+        }) ;
+    }
 }

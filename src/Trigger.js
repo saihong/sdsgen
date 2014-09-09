@@ -12,10 +12,12 @@ var CodeUtils = require('./CodeUtils.js'),
     ProjectSkeleton = require('./ProjectSkeleton.js'),
     ejs = require('ejs'),
     fs = require('fs-extra'),
-    nodeFileParser = require('./Node.js');
+    nodeFileParser = require('./Node.js'),
+    sysId = args[0];
 
-var triggerSdsFileName = args[0].replace(/\.txt$/,''),
-    sysId = triggerSdsFileName.replace(/\..+$/, '');
+//var triggerSdsFileName = args[0].replace(/\.txt$/,''),
+//    sysId = triggerSdsFileName.replace(/\..+$/, '');
+
 
 var Trigger = {
 };
@@ -57,19 +59,37 @@ function getTriggerSDSPath(sysId, triggerId) {
     return ProjectSkeleton.getTriggerDir(sysId, triggerId);
 }
 
-function genTrigger(triggerSdsFileName) {
-    var triggerNode = nodeFileParser(getTriggerSDSPath(sysId, triggerSdsFileName+'.txt'));
+function genTrigger(triggerSdsPath) {
+    var triggerNode = nodeFileParser(triggerSdsPath);
     var vo = new Trigger.VO(triggerNode.firstChild());
 
     var triggerTmpl = fs.readFileSync('template/trigger.java', 'utf8');
     var output = ejs.render(triggerTmpl, vo);
     var javaDir = ProjectSkeleton.getJavaSrcDir(sysId) + '/' + vo.pkgDir;
 
-    var code = CodeUtils.genStuff('template/trigger.java', vo, javaDir + '/' + vo.triggerClz + '.java') ;
+    var code = CodeUtils.genStuff('trigger.java', vo, javaDir + '/' + vo.triggerClz + '.java') ;
     vo.code = code ;
-    CodeUtils.genStuff('template/trigger.md', vo, ProjectSkeleton.getMdTriggerFilePath(sysId, vo.triggerId)) ;
-
+    CodeUtils.genStuff('trigger.md', vo, ProjectSkeleton.getMdTriggerFilePath(sysId, vo.triggerId)) ;
+    return vo;
 }
 
-genTrigger(triggerSdsFileName);
+module.exports = {
+    genMD:function(sysId,cache) {
+        var triggerDir = ProjectSkeleton.getTriggerDir(sysId);
+        var files = fs.readdirSync(triggerDir),
+            triggers = [];
+        files.forEach(function(file){
+            if (/\.txt$/.test(file)) {
+                var triggerSdsPath = triggerDir + '/' + file;
+                if (cache.isModified(triggerSdsPath)) {
+                    var vo = genTrigger(triggerSdsPath) ;
+                    triggers.push(vo) ;
+                }
+            }
+        });
 
+        CodeUtils.genStuff('triggerList.md', {sysId:sysId,triggers:triggers},
+            ProjectSkeleton.getMdTriggerFilePath(sysId, 'index')) ;
+        return triggers ;
+    }
+}
