@@ -1,4 +1,7 @@
 #<%=spec.id%> <%=spec.name%>
+
+**[<%=spec.sysId%>系統目錄](wiki.html#!<%=spec.sysId%>/sds/index.md)** > [spec清單](wiki.html#!<%=spec.sysId%>/sds/spec/index.md)
+
 ## 1. SPEC 說明
 --------
 <%spec.statements.forEach(function(line){ -%>
@@ -67,3 +70,4 @@ VO ID | VO Class | 數量
 <%= column.label %>|<%= column.type %>|<%= column.name %>|<%= column.descript %>|<%= column.verifyEvent %>
 <%})%>
 <% }) %>
+#### [回spec清單](wiki.html#!<%=spec.sysId%>/sds/spec/index.md)
