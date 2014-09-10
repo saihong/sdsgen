@@ -1,10 +1,57 @@
-$YEAR	民國年格式為YYY	$preYM
-$MONTH	格式為MM	$preYM
-$YYYMMDD	民國年格式YYY/MM/DD	目前日期
-客戶編號	文字	$data.CUSTNO
-公司名稱	文字	$custMap.CUSTNAME
-產品編號	文字	$data.PRODNO
-產品	文字	$data.PRODNAME
-出貨量	數字	$data.WGT
-電話	文字	$custMap.CUSTTEL
-住址	文字	$custMap.CUSTADDR
+#Report (PBJC2PX 產副品、呆廢料出貨月報表)
+	reportNo: PB02
+	file: PBJC2PX_sample.xls
+	msgId: SSSSJCR100  00
+
+	description
+		Note:特殊的標記，可使用 Note:, Warning:, Hint: 這3個標記，將以特殊的顏色區塊呈現，強化效果。
+		- 這裡開始寫關於這份spec的整體說明
+		- 項目範圍可分別使用 +,-,* 來表示，有階層關係，請用不同符號分開，當然也可不用項目符號。
+			+ 第 2.1 層資料，以 tab shift進來一格，代表後退一階
+			+ 第 2.2 層資料
+				* 第 3.1 層資料
+				* 第 3.2 層資料
+
+#Module
+	relations
+		pbjc2r->sajc01VO, pbjc2r->sajc02VO, pbjc2r->sajcB2VO, pbjc2r->sbjcApi01
+		sbjcApi01->sbjcLogic01
+	tables
+		[TBFVB01]1-0..*[TBFVB02], [TBFVB01]1-0..*[TBFVA02], [TBFVB01]1-0..*[TBFVB05]
+
+#class (scjcRptR250)
+	+execute()
+		說明:
+		condition
+			compId='0000'
+			preYM=取系統日期的上個年月，格式為YYYYMM
+		logic
+			1. 執行SQL產生$data
+			[sql]
+				SELECT  CUSTNO_SS00SO, PRODNO_SS00SO, PRODNAME_SS00SO,
+								SUM(SHIPWEIGHT_SS00SO) WGT
+				FROM SS.TBSS00SO
+				WHERE SHIPDATE_SS00SO LIKE '$preYM%' 
+				AND (     FORMID_SS00SO = 'SSE0'
+							OR (FORMID_SS00SO='SO50' AND PRODNO_SS00SO LIKE 'U1200%'))
+				AND SUBSTR(PRODNO_SS00SO,1,1) IN ('K','N','U','W','Z','Y')
+				GROUP BY CUSTNO_SS00SO, PRODNO_SS00SO, PRODNAME_SS00SO
+				ORDER BY CUSTNO_SS00SO, PRODNO_SS00SO
+			2. 產製報表時需要查詢顧客資訊，請調用服務com.icsc.ss.logic.**ssjcLogic046**(compId, data.CUSTNO_SS00SO)取得$custMap
+				(因目前此API會回傳空Map，查不到資料屬正常，相同顧客編號只取1次)；其餘相關格式設定與字型請參考範例SC25R1_sample.xlsx	
+				
+#column
+	Note: 1. Sheet名稱為SC25R1, 2. 文字靠左，數字靠右, 3. 簡化描述，省略中鋼TABLE欄位規則(_XXXX)
+
+	畫面欄位名稱|說 明|資料來源
+	------------|-----|---------
+	$YEAR|民國年格式為YYY|$preYM
+	$MONTH|格式為MM|$preYM
+	$YYYMMDD|民國年格式YYY/MM/DD|目前日期
+	客戶編號|文字|$data.CUSTNO
+	公司名稱|文字|$custMap.CUSTNAME
+	產品編號|文字|$data.PRODNO
+	產品|文字|$data.PRODNAME
+	出貨量|數字|$data.WGT
+	電話|文字|$custMap.CUSTTEL
+	住址|文字|$custMap.CUSTADDR
