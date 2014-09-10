@@ -46,6 +46,9 @@ module.exports = {
     getSpecTestDir:function(sysId,specId) {
         return toPath( [this.getSpecDir(sysId,specId),'test'])
     },
+    getSpecRptDir:function(sysId,specId) {
+        return toPath( [this.getSpecDir(sysId,specId),'rpt'])
+    },
     getSpecListPath:function(sysId) {
         return toPath( [this.getSdsDir(sysId),sysId+'-spec.txt'] ) ;
     },

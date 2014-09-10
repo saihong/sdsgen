@@ -1,0 +1,10 @@
+$YEAR	民國年格式為YYY	$preYM
+$MONTH	格式為MM	$preYM
+$YYYMMDD	民國年格式YYY/MM/DD	目前日期
+客戶編號	文字	$data.CUSTNO
+公司名稱	文字	$custMap.CUSTNAME
+產品編號	文字	$data.PRODNO
+產品	文字	$data.PRODNAME
+出貨量	數字	$data.WGT
+電話	文字	$custMap.CUSTTEL
+住址	文字	$custMap.CUSTADDR

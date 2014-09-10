@@ -32,6 +32,7 @@ function buildDir(specId) {
     myMkdir(ProjectSkeleton.getSpecImgDir(sysId, specId));
     myMkdir(ProjectSkeleton.getSpecTestDir(sysId, specId));
     myMkdir(ProjectSkeleton.getSpecGulDir(sysId, specId));
+    myMkdir(ProjectSkeleton.getSpecRptDir(sysId, specId));
 }
 
 function myMkdir(dir) {
