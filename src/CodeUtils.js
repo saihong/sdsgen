@@ -122,18 +122,21 @@ module.exports  = {
     capitalize:function(str){
         return str.substring(0,1).toUpperCase()+str.substring(1) ;
     },
+
     genStuff:function(templatePath, context, destFile) {
         var dir = destFile.replace(/\/[\w\-\.]+$/,'') ;
         var tmpl = fs.readFileSync('template/'+templatePath, 'utf8');
         var output = ejs.render(tmpl, context) ;
         mkdirp(dir, function(err){
             if(err) console.error(err) ;
-            else {
+            else if (!/\.java$/.test(destFile) || process.overwriteJava ) {
                 fs.writeFile(destFile, output, 'utf8', function () {
-                    console.log(destFile  + ' is created!');
+                    console.log('[created]'+destFile);
                 });
+            } else {
+                console.log('[exists]'+destFile) ;
             }
-        })
+        }) ;
         return output ;
     }
 };

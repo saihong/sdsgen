@@ -34,7 +34,7 @@
 VO ID | VO Class | 數量 
 ------|----------|-------
 <%vos.forEach(function(vo){ -%>
-<%=vo.id%>|<%=vo.voClz%>|<%=vo.multi?'*':'1'%>
+<%=vo.id%>|[<%=vo.voClz%>](wiki.html#!<%=vo.sysId%>/sds/common/table/<%=vo.tableId%>.md)|<%=vo.multi?'*':'1'%>
 <% })%>
 
 ### 4.2 init 初始化
@@ -64,10 +64,13 @@ VO ID | VO Class | 數量
 --------
 <% colGrp.forEach(function(columnGroup, idx){ -%>
 ### 5.<%=idx+1%> <%= columnGroup.groupType %> - <%= columnGroup.groupId %>
+<% if( columnGroup.datasrc.trim().length>0 ) { -%>
+** datasrc = [<%=columnGroup.datasrc%>](<%=spec.sysId%>/sds/common/trigger/<%=columnGroup.datasrc%>.md) **
+<%} -%>
 畫面欄位 | 欄位種類 | 欄位名稱 | 資料邏輯 | 驗證時機
 ---------|----------|----------|------------
 <% columnGroup.columns.forEach(function(column){ -%>
 <%= column.label %>|<%= column.type %>|<%= column.name %>|<%= column.descript %>|<%= column.verifyEvent %>
 <%})%>
 <% }) %>
-#### [回spec清單](wiki.html#!<%=spec.sysId%>/sds/spec/index.md)
+**[<%=spec.sysId%>系統目錄](wiki.html#!<%=spec.sysId%>/sds/index.md)** > [spec清單](wiki.html#!<%=spec.sysId%>/sds/spec/index.md)

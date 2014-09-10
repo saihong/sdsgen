@@ -231,11 +231,12 @@ ValueObjects.funcVO = function(node) {
     this.daoClz = "";
     this.daoObj = "";
     this.multi = false;
-
+    this.tableId = null;
+    this.sysId = null ;
     this.parse = function(node) {
-        var rslt = /([\w]+)\s+([\w]+)\s*(\*)?/.exec(node.text);
+        var rslt = /([\w]+)\s+([\w]+)\s*(\*)?/.exec(node.text.trim());
         if (!rslt) {
-            throw new Error(node.text + " is not a [vo]");
+            throw new Error("["+node.text + "] is not a [vo]");
         }
         this.id = rslt[1];
         this.voClz = rslt[2];
@@ -243,7 +244,10 @@ ValueObjects.funcVO = function(node) {
         this.daoObj = this.daoClz.substring(4, 5).toLowerCase() + this.daoClz.substring(5);
         this.multi = rslt[3] != null;
         this.memberType = this.multi?"List<"+this.voClz+">":this.voClz ;
+        this.sysId = this.voClz.substr(0,2).toLowerCase() ;
+        this.tableId = process.daotool.findTableByVO(this.voClz) ;
     }
+
     this.getClz = function() {
         return this.multi ? "List<" + this.voClz + ">" : this.voClz;
     }
@@ -353,7 +357,7 @@ ValueObjects.columnGroup = function(node) {
     var ans = CodeUtils.exec(/\-\s*(\w+)\s*\[(.*)\]\s*(datasrc=.+)?\s*\-/, node.text);
     this.groupType = ans[1];
     this.groupId = ans[2] || '';
-    this.datasrc= (ans[3]||'').replace(/datasrc=/,'').trim();
+    this.datasrc= (ans[3]||'').replace(/datasrc=|['"]/g,'').trim();
 
     var cols = [];
     node.children.forEach(function(col) {
@@ -367,6 +371,9 @@ ValueObjects.columnGroup = function(node) {
             }
         }
         return null;
+    }
+    this.hasDatasrc=function() {
+        return this.datasrc.trim().length>0 ;
     }
 };
 

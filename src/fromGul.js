@@ -1,16 +1,19 @@
 var xmldom = require('xmldom'),
     fs = require('fs'),
     ejs = require('ejs'),
+
     mkdirp = require('mkdirp'),
     args = process.argv.slice(2),
     sysId = args[0].substring(0,2).toLowerCase(),
     inputArg = args[0].replace(/\\/g,'/'),
     specId = inputArg.indexOf('/')>-1?inputArg.replace(/\/.+$/,''):inputArg.replace(/\.gul$/,''),
+    skeleton = require('./ProjectSkeleton.js'),
     gulName = inputArg.replace(/^.+\//,''),
     DOMParser = xmldom.DOMParser,
     XMLSerializer = xmldom.XMLSerializer,
-    filePath='../'+sysId+'/sds/'+specId+'/gul/'+gulName,
-    sdsTxtPath= '../'+sysId+'/sds/'+specId+'/'+specId+'.txt' ;
+    specDir=skeleton.getSpecDir(sysId, specId),
+    filePath=specDir+'/gul/'+gulName,
+    sdsTxtPath= specDir+'/'+specId+'.txt' ;
 
 console.log('processing '+filePath+'...') ;
 

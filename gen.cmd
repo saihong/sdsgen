@@ -1,1 +1,1 @@
-node src/gen.js %1 %2
+node src/Main.js %1 %2

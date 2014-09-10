@@ -37,14 +37,14 @@ module.exports = {
     getSpecDir: function (sysId, specId) {
         return toPath( [this.getSpecRootDir(sysId), specId] );
     },
-    getSpecImgDir:function(specId) {
-        return toPath( [this.getSpecDir(specId),'img'])
+    getSpecImgDir:function(sysId,specId) {
+        return toPath( [this.getSpecDir(sysId,specId),'img'])
     },
-    getSpecGulDir:function(specId,gulFile) {
-        return toPath( [this.getSpecDir(specId),'gul'], gulFile)
+    getSpecGulDir:function(sysId,specId,gulFile) {
+        return toPath( [this.getSpecDir(sysId,specId),'gul'], gulFile)
     },
-    getSpecTestDir:function(specId) {
-        return toPath( [this.getSpecDir(specId),'test'])
+    getSpecTestDir:function(sysId,specId) {
+        return toPath( [this.getSpecDir(sysId,specId),'test'])
     },
     getSpecListPath:function(sysId) {
         return toPath( [this.getSdsDir(sysId),sysId+'-spec.txt'] ) ;
@@ -63,6 +63,9 @@ module.exports = {
     },
     getMdSpecDir:function(sysId, spec) {
         return toPath([this.getMdSpecRootDir(sysId), spec]) ;
+    },
+    getMdSpecImgDir:function(sysId, spec) {
+        return toPath([this.getMdSpecDir(sysId,spec), 'img']) ;
     },
     getMdCommonDir:function(sysId) {
         return toPath([this.getMdDir(sysId), 'common']) ;

@@ -1,8 +1,9 @@
 #SPEC (<%=spec.id%> <%=spec.name%>)
 	description
+		Note:特殊的標記，可使用 Note:, Warning:, Hint: 這3個標記，將以特殊的顏色區塊呈現，強化效果。
 		- 這裡開始寫關於這份spec的整體說明
-		- 這裡開始寫關於這份spec的整體說明
-			+ 第 2.1 層資料
+		- 項目範圍可分別使用 +,-,* 來表示，有階層關係，請用不同符號分開，當然也可不用項目符號。
+			+ 第 2.1 層資料，以 tab shift進來一格，代表後退一階
 			+ 第 2.2 層資料
 				* 第 3.1 層資料
 				* 第 3.2 層資料
@@ -49,18 +50,37 @@
 <% }) %>
 
 	-List<fvjctbD3VO> getDatas(String compId, String version, String tradeItem)
-		宣告 private 方法
-		取得畫面資料
-		List datas
-		String id = [操作者工號][_][西元年月日時分秒]，如：I12345_20140730105730
-		產生本作業所需的資料
-			call fv.logic.fvjcCreateLD4AData.createD3TmpData(dsCom, id, compId, version, tradeItem)
-		取得圖一A組的資料   
-			List<fvjctbD3TMPVO> D3TMPVO = fvjctbD3TMPDAO.getLD4ADataA(id, compId, version, tradeItem)
-			for vo:D3TMPVO
-				vo.buyCodeName = cg.api.cgjcApi.getCompanyName(vo.buyCode)
+		- 記得前面都需用 tab 來 shift，不要用空白
+		- 否則
+			* 科目代碼有值，以公司統編、年月、fAcctCode上層科目=階層科目、科目代碼、階層=階層+1，查TBAGD2。
+			* 否則，以公司統編、年月、fAcctCode上層科目=階層科目、階層=階層+1，查TBAGD2。
+		- 根據步驟二資料判斷有資料顯示「查詢成功」，否則顯示「查詢失敗！」+如有錯誤訊息
+		- 以下為參考邏輯正確邏輯以文字為主
 
-	end 
+		若需用table表示，可使用以下表示法，記得留一行空白。
+		
+		欄一 | 欄二 | 欄三 
+		-----|------|-------
+		xxx | yyy | zzz
+		xxx | yyy | zzz
+		xxx | yyy | zzz
+		xxx |     | zzz
+		xxx | yyy |  
+		xxx | yyy | aaa 
+
+		[java]
+			宣告 private 方法
+			取得畫面資料
+			List datas
+			String id = [操作者工號][_][西元年月日時分秒]，如：I12345_20140730105730
+			產生本作業所需的資料
+				call fv.logic.fvjcCreateLD4AData.createD3TmpData(dsCom, id, compId, version, tradeItem)
+			取得圖一A組的資料   
+				List<fvjctbD3TMPVO> D3TMPVO = fvjctbD3TMPDAO.getLD4ADataA(id, compId, version, tradeItem)
+				for vo:D3TMPVO
+					vo.buyCodeName = cg.api.cgjcApi.getCompanyName(vo.buyCode)
+
+	end 	
 		控制畫面UI
 		設定畫面授權
 		將畫面資料放入
