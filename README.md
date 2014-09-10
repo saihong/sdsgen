@@ -3,12 +3,12 @@ sdsgen
 產生SDS 工具
 
 ##install 
-1.安裝 nodejs
-2.安裝 git
-3.在 erpHome/公司別 目錄下，執行 git clone 此 .git
-4.進入 sdsgen 目錄
-5.將 wiki.html 放到 erpHome/公司別/html 目錄下
-6.執行 npm install
+1. 安裝 nodejs
+2. 安裝 git
+3. 在 erpHome/公司別 目錄下，執行 git clone 此 .git
+4. 進入 sdsgen 目錄
+5. 將 wiki.html 放到 erpHome/公司別/html 目錄下
+6. 執行 npm install
 
 ##指令說明
 + skeleton %1
