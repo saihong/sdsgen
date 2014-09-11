@@ -9,7 +9,7 @@ sdsgen
 4. 進入 sdsgen 目錄
 5. 將 wiki.html 放到 erpHome/公司別/html 目錄下
 6. 執行 npm install
-
+      
 ##指令說明
 + skeleton %1
   - 產生sds骨架目錄，%1 為系統代號，如:
